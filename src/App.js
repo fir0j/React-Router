@@ -1,28 +1,64 @@
 import React, { Fragment, useState } from 'react';
-import { BrowserRouter as Router, Link, Route, Switch, Redirect, useParams } from 'react-router-dom';
+import {
+	BrowserRouter as Router,
+	Link,
+	Route,
+	Switch,
+	Redirect,
+	useParams,
+	useRouteMatch,
+	useLocation,
+	useHistory
+} from 'react-router-dom';
 
 // Home Page
 const Homepage = () => (
 	<Fragment>
-		<h1>Home</h1>
-		<FakeText />
+		<h1>Home page</h1>
 	</Fragment>
 );
 
 // About Page
-const About = (props) => {
+const About = () => {
+	// getting url and path dynamically instead of manually typing in <Link/> component
+	const { url, path } = useRouteMatch();
+
 	// const name =  props.match.params.name
 	// or by distructuring props as {match:{params:{name}}}
 	// or by using react-router-dom hooks like below
 	// Props or placeholder(:) can only be received by the component to which prop has been passed.
 
-	console.log(props);
+	return (
+		<Fragment>
+			<ul>
+				<li>
+					<Link to={`${url}/firoj`}>Firoj</Link>
+				</li>
+				<li>
+					<Link to={`${url}/offrose`}>Offrose</Link>
+				</li>
+				<li>
+					<Link to={`${url}/sakina`}>Sakina</Link>
+				</li>
+				<li>
+					<Link to={`${url}/saharoj`}>Saharoj</Link>
+				</li>
+			</ul>
+
+			<Switch>
+				<Route path={`${path}/:name`}>
+					<Welcome />
+				</Route>
+			</Switch>
+		</Fragment>
+	);
+};
+
+const Welcome = () => {
 	const { name } = useParams();
 	return (
 		<Fragment>
-			{name !== 'firoj' ? <Redirect to="/" /> : null}
-			<h1>About {name}</h1>
-			<FakeText />
+			<p>Welcome {name}</p>
 		</Fragment>
 	);
 };
@@ -31,51 +67,14 @@ const About = (props) => {
 const Contact = () => {
 	return (
 		<Fragment>
-			<h1>Contact</h1>
-			<FakeText />
+			<h1>Contact Page</h1>
 		</Fragment>
-	);
-};
-
-const SignedIn = () => {
-	return (
-		<Fragment>
-			<p>Welcome!!!</p>
-		</Fragment>
-	);
-};
-
-const NotSignedIn = () => (
-	<Fragment>
-		<p>You are not signed in Yet.</p>
-	</Fragment>
-);
-
-const FakeText = () => (
-	<p>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-		magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-		consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-		pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-		laborum.
-	</p>
-);
-
-const Child = () => {
-	let { name } = useParams();
-
-	return (
-		<div>
-			<h3>Hi: {name}</h3>
-		</div>
 	);
 };
 
 // Link is similar to <a> tag and to is similar to href attribute in html.
 
-const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
-	const name = 'firoj';
-
+const Navbar = () => {
 	return (
 		<Fragment>
 			<nav>
@@ -84,15 +83,14 @@ const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
 						<Link to="/">Home</Link>
 					</li>
 					<li>
-						{/* dynamically adding route path */}
-						<Link to={`/about/${name}`}>About</Link>
+						<Link to="/about">About</Link>
 					</li>
 					<li>
 						<Link to="/contact">Contact</Link>
 					</li>
 					<li>
 						<Link to="/signin">
-							<button onClick={() => setIsAuthenticated(!isAuthenticated)}>SignIn</button>
+							<button>SignIn</button>
 						</Link>
 					</li>
 				</ul>
@@ -107,7 +105,7 @@ const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
 // if no path attribute is set on Route compoenent, it is default for rendering no path is matched( useful in scenerio like page not found)
 // using children attribute, all the components' params cab accessed into the child component
 
-export default function App() {
+export default function TurtorialApp() {
 	const [ isAuthenticated, setIsAuthenticated ] = useState(true);
 
 	return (
@@ -115,18 +113,25 @@ export default function App() {
 			<Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
 			<main>
 				<Switch>
-					<Route exact path="/" component={Homepage} />
-					<Route exact path="/notsignedin" component={NotSignedIn} />
-					{/* <Route component={NotSignedIn} /> */}
+					<Route exact path="/">
+						<Homepage />
+					</Route>
 					{isAuthenticated ? (
 						<Fragment>
-							<Route path="/about/:name" component={About} children={<Child />} />
-							<Route path="/contact" component={Contact} />
-							<Route path="/signin" component={SignedIn} />
-							{/* <Route render={() => <h1>404: page not found</h1>} /> */}
+							<Switch>
+								<Route path="/about">
+									<About />
+								</Route>
+								<Route path="/contact">
+									<Contact />
+								</Route>
+								<Route render={() => <h1>404: page not found</h1>} />
+							</Switch>
 						</Fragment>
 					) : (
-						<Redirect to="/notsignedin" />
+						<Fragment>
+							<Redirect to="/" />
+						</Fragment>
 					)}
 				</Switch>
 			</main>
